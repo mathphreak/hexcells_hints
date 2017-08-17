@@ -2,6 +2,15 @@ from PIL import Image, ImageFilter, ImageOps, ImageStat
 from .cell import Cell
 from .util import SloppyDict
 from collections import defaultdict
+import pytesseract
+import platform
+
+
+if platform.system() == 'Windows':
+    pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files (x86)\Tesseract-OCR\tesseract'
+    tessdata_dir_config = r'--tessdata-dir "C:\Program Files (x86)\Tesseract-OCR\tessdata"'
+else:
+    tessdata_dir_config = ''
 
 
 def hex_box(x, y, edge_len, buffer=5):
@@ -33,9 +42,6 @@ k = 0
 def get_hex_label(hex):
     # hex = hex.resize((3 * hex.width, 3 * hex.height), Image.BICUBIC)
     global k
-    import pytesseract
-    pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files (x86)\Tesseract-OCR\tesseract'
-    tessdata_dir_config = r'--tessdata-dir "C:\Program Files (x86)\Tesseract-OCR\tessdata"'
     # hex.save('hex_' + str(k) + '.png')
     k += 1
     result = pytesseract.image_to_string(hex, lang='eng', config='--psm 8 ' + tessdata_dir_config)
