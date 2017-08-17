@@ -1,0 +1,4 @@
+Pillow
+pytest
+pytesseract
+flake8
