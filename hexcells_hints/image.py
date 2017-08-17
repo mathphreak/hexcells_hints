@@ -12,9 +12,11 @@ def hex_box(x, y, edge_len, buffer=5):
 
 
 def get_hex_edge(edges, threshold=60):
-    # start at 5 to dodge artifacts
-    for y in range(5, edges.height - 5):
-        for x in range(max(5, 256 - y), edges.width - 5):
+    for sum in range(260, edges.height + edges.width - 10):
+        for y in range(5, sum - 5):
+            x = sum - y
+            if x > edges.width - 5 or y > edges.height - 5:
+                continue
             if edges.getpixel((x, y)) > threshold:
                 print('EDGE:', (x, y))
                 start_x = x
@@ -22,39 +24,52 @@ def get_hex_edge(edges, threshold=60):
                 while end_x < edges.width and edges.getpixel((end_x, y)) > threshold:
                     end_x += 1
                 if end_x - start_x > 10:
-                    return end_x - start_x
+                    return round((end_x - start_x) / 8) * 8
 
 
 k = 0
 
 
 def get_hex_label(hex):
-    bbox = hex.getbbox()
-    bbox = (bbox[0] + 32, bbox[1] + 10, bbox[2] - 30, bbox[3] - 20)
-    hex = hex.crop(bbox)
-    # hex = hex.resize((5 * hex.width, 5 * hex.height), Image.BICUBIC)
+    # hex = hex.resize((3 * hex.width, 3 * hex.height), Image.BICUBIC)
     global k
     import pytesseract
     pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files (x86)\Tesseract-OCR\tesseract'
     tessdata_dir_config = r'--tessdata-dir "C:\Program Files (x86)\Tesseract-OCR\tessdata"'
-    hex.save('hex_' + str(k) + '.png')
+    # hex.save('hex_' + str(k) + '.png')
     k += 1
-    result = pytesseract.image_to_string(hex, config='--psm 8 ' + tessdata_dir_config)
-    return result.upper().replace('O', '0').replace('T', '1').strip(' ,')
+    result = pytesseract.image_to_string(hex, lang='eng', config='--psm 8 ' + tessdata_dir_config)
+    result = result.upper().replace('O', '0').replace('T', '1').replace('S', '5')
+    result = result.strip(" ,'\u2018\u2019")
+    # I still don't understand where this came from.
+    result = result.lstrip('Y')
+    if result[0] == '{':
+        result = result[:2] + '}'
+    elif result[-1] == '}':
+        result = '{' + result[-2:]
+    elif result[0] == '-':
+        result = result[:2] + '-'
+    elif result[-1] == '-':
+        result = '-' + result[-2:]
+    return result
 
 
 def parse_hex(hex):
-    median = ImageStat.Stat(hex).median
-    if median[0] > 200 and 100 < median[1] < 200 and median[2] < 100:
+    bbox = hex.getbbox()
+    bbox = (bbox[0] + 24, bbox[1] + 20, bbox[2] - 30, bbox[3] - 25)
+    hex_body = hex.crop(bbox)
+    median = ImageStat.Stat(hex_body).median
+    if median[0] > 200 and 150 < median[1] < 200 and median[2] < 100:
         return Cell(False, None, None)
-    if median[0] < 100 and 100 < median[1] < 200 and median[2] > 200:
+    if median[0] < 50 and 150 < median[1] < 200 and median[2] > 200:
         return Cell(True, True, '')
     if median[0] < 100 and median[1] < 100 and median[2] < 100:
-        return Cell(True, False, get_hex_label(hex))
+        return Cell(True, False, get_hex_label(hex_body))
     if median[0] > 200 and median[1] > 200 and median[2] > 200:
         return None
     print('Unknown color:', median)
     Image.new('RGB', (100, 100), tuple(median)).show()
+    hex.show()
     return median
 
 
@@ -91,7 +106,7 @@ def load_image(path):
                 print(x, y)
                 box = hex_box(x, y, hex_edge_len, buffer)
                 hex = im.crop(box)
-                # hex.show()
+                # edges.show()
                 hex_ghost = Image.new('L', (box[2] - box[0], box[3] - box[1]), 10)
                 edges.paste(hex_ghost, box=box)
                 # edges.show()
