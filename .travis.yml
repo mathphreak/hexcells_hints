@@ -7,7 +7,8 @@ install:
     - tar xzf leptonica.tar.gz
     - cd leptonica-1.74.1
     - mkdir -p $HOME/local
-    # - autoconf
+    - autoreconf --install
+    - autoconf
     - automake
     - ./configure --prefix=$HOME/local/
     - make
