@@ -2,3 +2,4 @@ Pillow
 pytest
 pytesseract
 flake8
+tox
