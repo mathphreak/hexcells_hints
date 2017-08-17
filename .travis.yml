@@ -8,8 +8,6 @@ install:
     - cd leptonica-1.74.1
     - mkdir -p $HOME/local
     - autoreconf --install
-    - autoconf
-    - automake
     - ./configure --prefix=$HOME/local/
     - make
     - make install
