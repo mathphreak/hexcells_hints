@@ -1,10 +1,9 @@
 language: python
 sudo: required
 install:
-    - pushd
     - pip install -r requirements.txt
     - mkdir -p vendor
-    - cd vendor
+    - pushd vendor
     - |
         if [ ! -d leptonica-1.74.4 ]; then
             curl -Lo leptonica.tar.gz https://github.com/DanBloomberg/leptonica/archive/1.74.4.tar.gz
