@@ -43,6 +43,10 @@ python:
     # - "nightly"
     # - "pypy"
     # - "pypy3"
+cache:
+    directories:
+        - vendor
+        - $HOME/.cache/pip
 addons:
     apt:
         packages:
