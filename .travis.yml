@@ -1,5 +1,27 @@
 language: python
-script: pytest
+install:
+    - pip install -r requirements.txt
+    - mkdir vendor
+    - cd vendor
+    - curl -o leptonica.tar.gz https://github.com/DanBloomberg/leptonica/archive/1.74.1.tar.gz
+    - tar xzf leptonica.tar.gz
+    - cd leptonica-1.74.1
+    - mkdir -p $HOME/local
+    - ./configure --prefix=$HOME/local/
+    - make
+    - make install
+    - cd ..
+    - curl -o tesseract.tar.gz https://github.com/tesseract-ocr/tesseract/archive/3.05.01.tar.gz
+    - tar xzf tesseract.tar.gz
+    - cd tesseract-3.05.01
+    - ./autogen.sh
+    - LIBLEPT_HEADERSDIR=$HOME/local/include ./configure --prefix=$HOME/local/ --with-extra-libraries=$HOME/local/lib
+    - make
+    - make install
+    - mkdir -p $HOME/tessdata
+    - curl -o $HOME/tessdata/eng.traineddata https://github.com/tesseract-ocr/tessdata/raw/master/eng.traineddata
+    - export PATH=$PATH:$HOME/local/bin
+script: pytest -vv
 python:
     - "2.6"
     - "2.7"
@@ -14,4 +36,13 @@ python:
 addons:
     apt:
         packages:
-            - tesseract-ocr
+            - g++
+            - autoconf
+            - automake
+            - libtool
+            - autoconf-archive
+            - pkg-config
+            - libpng12-dev
+            - libjpeg8-dev
+            - libtiff5-dev
+            - zlib1g-dev
