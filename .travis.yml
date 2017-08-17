@@ -1,6 +1,7 @@
 language: python
 sudo: required
 install:
+    - pushd
     - pip install -r requirements.txt
     - mkdir -p vendor
     - cd vendor
@@ -17,7 +18,7 @@ install:
             cd ..
         fi
     - |
-        if [ -d tesseract-3.05.01 ]; then
+        if [ ! -d tesseract-3.05.01 ]; then
             curl -Lo tesseract.tar.gz https://github.com/tesseract-ocr/tesseract/archive/3.05.01.tar.gz
             tar xzf tesseract.tar.gz
             cd tesseract-3.05.01
@@ -38,6 +39,7 @@ install:
     - curl -LO https://github.com/tesseract-ocr/tessdata/raw/3.04.00/eng.cube.lm
     - curl -LO https://github.com/tesseract-ocr/tessdata/raw/3.04.00/eng.cube.fold
     - curl -LO https://github.com/tesseract-ocr/tessdata/raw/3.04.00/eng.cube.bigrams
+    - popd
 script: pytest -vv
 python:
     # - "2.7"
