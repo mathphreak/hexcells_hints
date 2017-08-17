@@ -1,4 +1,5 @@
 language: python
+sudo: required
 install:
     - pip install -r requirements.txt
     - mkdir vendor
@@ -8,19 +9,28 @@ install:
     - cd leptonica-1.74.1
     - mkdir -p $HOME/local
     - autoreconf --install
-    - ./configure --prefix=$HOME/local/
+    - ./configure
     - make
-    - make install
+    - sudo make install
     - cd ..
     - curl -Lo tesseract.tar.gz https://github.com/tesseract-ocr/tesseract/archive/3.05.01.tar.gz
     - tar xzf tesseract.tar.gz
     - cd tesseract-3.05.01
     - ./autogen.sh
-    - LIBLEPT_HEADERSDIR=$HOME/local/include ./configure --prefix=$HOME/local/ --with-extra-libraries=$HOME/local/lib
+    - ./configure
     - make
-    - make install
+    - sudo make install
     - mkdir -p $HOME/tessdata
-    - curl -o $HOME/tessdata/eng.traineddata https://github.com/tesseract-ocr/tessdata/raw/master/eng.traineddata
+    - cd $HOME/tessdata
+    - curl -LO https://github.com/tesseract-ocr/tessdata/raw/3.04.00/eng.traineddata
+    - curl -LO https://github.com/tesseract-ocr/tessdata/raw/3.04.00/eng.tesseract_cube.nn
+    - curl -LO https://github.com/tesseract-ocr/tessdata/raw/3.04.00/eng.cube.word-freq
+    - curl -LO https://github.com/tesseract-ocr/tessdata/raw/3.04.00/eng.cube.size
+    - curl -LO https://github.com/tesseract-ocr/tessdata/raw/3.04.00/eng.cube.params
+    - curl -LO https://github.com/tesseract-ocr/tessdata/raw/3.04.00/eng.cube.nn
+    - curl -LO https://github.com/tesseract-ocr/tessdata/raw/3.04.00/eng.cube.lm
+    - curl -LO https://github.com/tesseract-ocr/tessdata/raw/3.04.00/eng.cube.fold
+    - curl -LO https://github.com/tesseract-ocr/tessdata/raw/3.04.00/eng.cube.bigrams
     - export PATH=$PATH:$HOME/local/bin
 script: pytest -vv
 python:
