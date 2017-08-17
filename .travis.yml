@@ -4,23 +4,29 @@ install:
     - pip install -r requirements.txt
     - mkdir -p vendor
     - cd vendor
-    - curl -Lo leptonica.tar.gz https://github.com/DanBloomberg/leptonica/archive/1.74.4.tar.gz
-    - tar xzf leptonica.tar.gz
-    - cd leptonica-1.74.4
-    - mkdir -p $HOME/local
-    - autoreconf --install
-    - ./configure
-    - make -j
-    - sudo make install
-    - cd ..
-    - curl -Lo tesseract.tar.gz https://github.com/tesseract-ocr/tesseract/archive/3.05.01.tar.gz
-    - tar xzf tesseract.tar.gz
-    - cd tesseract-3.05.01
-    - echo 'tesseract_LDADD += $(LEPTONICA_LIBS)' >> api/Makefile.am
-    - ./autogen.sh
-    - ./configure
-    - make -j
-    - sudo make install
+    - |
+        if [ ! -d leptonica-1.74.4 ]; then
+            curl -Lo leptonica.tar.gz https://github.com/DanBloomberg/leptonica/archive/1.74.4.tar.gz
+            tar xzf leptonica.tar.gz
+            cd leptonica-1.74.4
+            mkdir -p $HOME/local
+            autoreconf --install
+            ./configure
+            make -j
+            sudo make install
+            cd ..
+        fi
+    - |
+        if [ -d tesseract-3.05.01 ]; then
+            curl -Lo tesseract.tar.gz https://github.com/tesseract-ocr/tesseract/archive/3.05.01.tar.gz
+            tar xzf tesseract.tar.gz
+            cd tesseract-3.05.01
+            echo 'tesseract_LDADD += $(LEPTONICA_LIBS)' >> api/Makefile.am
+            ./autogen.sh
+            ./configure
+            make -j
+            sudo make install
+        fi
     - mkdir -p $HOME/tessdata
     - cd $HOME/tessdata
     - curl -LO https://github.com/tesseract-ocr/tessdata/raw/3.04.00/eng.traineddata
@@ -32,7 +38,6 @@ install:
     - curl -LO https://github.com/tesseract-ocr/tessdata/raw/3.04.00/eng.cube.lm
     - curl -LO https://github.com/tesseract-ocr/tessdata/raw/3.04.00/eng.cube.fold
     - curl -LO https://github.com/tesseract-ocr/tessdata/raw/3.04.00/eng.cube.bigrams
-    - export PATH=$PATH:$HOME/local/bin
 script: pytest -vv
 python:
     # - "2.7"
