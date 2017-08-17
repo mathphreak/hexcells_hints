@@ -49,7 +49,9 @@ def get_hex_label(hex):
     result = result.strip(" ,'\u2018\u2019")
     # I still don't understand where this came from.
     result = result.lstrip('Y')
-    if result[0] == '{':
+    if len(result) < 1:
+        pass
+    elif result[0] == '{':
         result = result[:2] + '}'
     elif result[-1] == '}':
         result = '{' + result[-2:]
