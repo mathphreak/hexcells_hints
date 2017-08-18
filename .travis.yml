@@ -26,6 +26,7 @@ install:
             ./configure
             make -j
             sudo make install
+            sudo ldconfig
             which tesseract || echo "Can't find tesseract in PATH"
         fi
     - mkdir -p $HOME/tessdata
