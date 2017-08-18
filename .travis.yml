@@ -30,6 +30,8 @@ install:
             ./autogen.sh
             ./configure
             make -j
+        else
+            make -t
         fi
     - sudo make install
     - sudo chmod a+rwx /usr/local/share/tessdata
