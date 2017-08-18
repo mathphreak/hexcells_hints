@@ -1,2 +1,78 @@
 language: python
-script: tox
+sudo: required
+install:
+    - pip install -r requirements.txt
+    - mkdir -p vendor
+    - pushd vendor
+    - |
+        if [ ! -d leptonica-1.74.4 ] || (git log -n1 | grep -q redo-lep); then
+            curl -Lo leptonica.tar.gz https://github.com/DanBloomberg/leptonica/archive/1.74.4.tar.gz
+            tar xzf leptonica.tar.gz
+        fi
+    - cd leptonica-1.74.4
+    - |
+        if [ ! -f src/.libs/liblept.so.5.0.1 ] || (git log -n1 | grep -q redo-lep); then
+            autoreconf --install
+            ./configure
+            make -j
+        fi
+    - sudo make install
+    - cd ..
+    - |
+        if [ ! -d tesseract-3.05.01 ] || (git log -n1 | grep -q redo-tess); then
+            curl -Lo tesseract.tar.gz https://github.com/tesseract-ocr/tesseract/archive/3.05.01.tar.gz
+            tar xzf tesseract.tar.gz
+        fi
+    - cd tesseract-3.05.01
+    - |
+        if [ ! -f api/.libs/tesseract ] || (git log -n1 | grep -q redo-tess); then
+            echo 'tesseract_LDADD += $(LEPTONICA_LIBS)' >> api/Makefile.am
+            ./autogen.sh
+            ./configure
+            make -j
+        else
+            make -t
+        fi
+    - sudo make install
+    - sudo chmod a+rwx /usr/local/share/tessdata
+    - sudo ldconfig
+    - which tesseract || echo "Can't find tesseract in PATH"
+    - cd /usr/local/share/tessdata
+    - curl -LO https://github.com/tesseract-ocr/tessdata/raw/3.04.00/eng.traineddata
+    - curl -LO https://github.com/tesseract-ocr/tessdata/raw/3.04.00/eng.tesseract_cube.nn
+    - curl -LO https://github.com/tesseract-ocr/tessdata/raw/3.04.00/eng.cube.word-freq
+    - curl -LO https://github.com/tesseract-ocr/tessdata/raw/3.04.00/eng.cube.size
+    - curl -LO https://github.com/tesseract-ocr/tessdata/raw/3.04.00/eng.cube.params
+    - curl -LO https://github.com/tesseract-ocr/tessdata/raw/3.04.00/eng.cube.nn
+    - curl -LO https://github.com/tesseract-ocr/tessdata/raw/3.04.00/eng.cube.lm
+    - curl -LO https://github.com/tesseract-ocr/tessdata/raw/3.04.00/eng.cube.fold
+    - curl -LO https://github.com/tesseract-ocr/tessdata/raw/3.04.00/eng.cube.bigrams
+    - popd
+script: pytest -vv
+python:
+    # - "2.7"
+    # - "3.2"
+    # - "3.3"
+    # - "3.4"
+    - "3.5"
+    # - "3.6"
+    # - "nightly"
+    # - "pypy"
+    # - "pypy3"
+cache:
+    directories:
+        - vendor
+        - $HOME/.cache/pip
+addons:
+    apt:
+        packages:
+            - g++
+            - autoconf
+            - automake
+            - libtool
+            - autoconf-archive
+            - pkg-config
+            - libpng12-dev
+            - libjpeg8-dev
+            - libtiff5-dev
+            - zlib1g-dev
