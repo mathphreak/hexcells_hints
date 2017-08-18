@@ -5,7 +5,7 @@ install:
     - mkdir -p vendor
     - pushd vendor
     - |
-        if [ ! -d leptonica-1.74.4 ]; then
+        if [ ! -f /usr/local/lib/liblept.so.5.0.1 ] || (git log -n1 | grep -q redo-lep); then
             curl -Lo leptonica.tar.gz https://github.com/DanBloomberg/leptonica/archive/1.74.4.tar.gz
             tar xzf leptonica.tar.gz
             cd leptonica-1.74.4
@@ -17,7 +17,7 @@ install:
             cd ..
         fi
     - |
-        if [ ! -d tesseract-3.05.01 ]; then
+        if [ ! -f /usr/local/bin/tesseract ] || (git log -n1 | grep -q redo-tess); then
             curl -Lo tesseract.tar.gz https://github.com/tesseract-ocr/tesseract/archive/3.05.01.tar.gz
             tar xzf tesseract.tar.gz
             cd tesseract-3.05.01
@@ -26,6 +26,7 @@ install:
             ./configure
             make -j
             sudo make install
+            which tesseract || echo "Can't find tesseract in PATH"
         fi
     - mkdir -p $HOME/tessdata
     - cd $HOME/tessdata
