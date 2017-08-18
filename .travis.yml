@@ -25,7 +25,7 @@ install:
         fi
     - cd tesseract-3.05.01
     - |
-        if [ ! -f src/.libs/tesseract ] || (git log -n1 | grep -q redo-tess); then
+        if [ ! -f api/.libs/tesseract ] || (git log -n1 | grep -q redo-tess); then
             echo 'tesseract_LDADD += $(LEPTONICA_LIBS)' >> api/Makefile.am
             ./autogen.sh
             ./configure
