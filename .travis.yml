@@ -25,13 +25,14 @@ install:
         fi
     - cd tesseract-3.05.01
     - |
-        if [ ! -f /usr/local/bin/tesseract ] || (git log -n1 | grep -q redo-tess); then
+        if [ ! -f src/.libs/tesseract ] || (git log -n1 | grep -q redo-tess); then
             echo 'tesseract_LDADD += $(LEPTONICA_LIBS)' >> api/Makefile.am
             ./autogen.sh
             ./configure
             make -j
         fi
     - sudo make install
+    - sudo chmod a+rwx /usr/local/share/tessdata
     - sudo ldconfig
     - which tesseract || echo "Can't find tesseract in PATH"
     - cd /usr/local/share/tessdata
